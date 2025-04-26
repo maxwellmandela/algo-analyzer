@@ -30,3 +30,10 @@ Requires Python 3.11 or higher.
 ### Frontend setup:
 
 For instructions on how to run the frontend, including setting up the required `.env` file, refer to the `README.md` file located in the frontend directory.
+
+### Deployed fronted(vercel):
+
+https://algo-analyzer-delta.vercel.app/
+
+PENDING:
+Backend deployment
