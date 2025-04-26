@@ -7,12 +7,35 @@ import { python } from "@codemirror/lang-python";
 import { oneDark } from "@codemirror/theme-one-dark";
 import Markdown from "react-markdown";
 import Button from "../components/ui/Button";
+import Loader from "../components/ui/Loader";
+
+// Reusable TabButton component
+const TabButton = ({
+  isActive,
+  onClick,
+  children,
+}: {
+  isActive: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) => (
+  <button
+    onClick={onClick}
+    className={`flex-1 py-2 text-center ${
+      isActive
+        ? "border-b-2 border-blue-500 text-blue-500"
+        : "text-gray-600 dark:text-gray-400"
+    }`}
+  >
+    {children}
+  </button>
+);
 
 const CodeAnalysis = () => {
   const [language, setLanguage] = useState("python");
   const [result, setResult] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [activeTab, setActiveTab] = useState("editor"); // Track active tab for small devices
+  const [activeTab, setActiveTab] = useState("editor");
 
   // sample code snippet
   const [code, setCode] = useState(`def fibonacci(n):
@@ -25,20 +48,24 @@ const CodeAnalysis = () => {
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
-      const response = await fetch("http://localhost:5000/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ code, language }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/analyze`, // Use environment variable
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code, language }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to analyze code");
       }
 
       const analysis = await response.json();
-      setResult(JSON.stringify(analysis, null, 2)); // Store raw JSON
+
+      setResult(JSON.stringify(analysis, null, 2));
     } catch (error) {
       console.error("Error analyzing code:", error);
       setResult("Error analyzing code.");
@@ -64,7 +91,7 @@ const CodeAnalysis = () => {
       let markdownOptimizations = "";
       if (analysis.optimizations && Array.isArray(analysis.optimizations)) {
         markdownOptimizations = analysis.optimizations
-          .map((opt: string) => `- ${opt}`)
+          .map((opt: string) => `* ${opt}`)
           .join("\n");
       } else {
         markdownOptimizations = "No optimizations suggested.";
@@ -88,8 +115,6 @@ const CodeAnalysis = () => {
 
           <h3 className="heading-lg">Optimizations</h3>
           <Markdown>{markdownOptimizations}</Markdown>
-          <h3 className="heading-lg">Language</h3>
-          <p className="text-info">{analysis.language}</p>
         </div>
       );
     } catch (error) {
@@ -108,37 +133,42 @@ const CodeAnalysis = () => {
       {/* Tabs for small devices */}
       <div className="block md:hidden mb-4">
         <div className="flex border-b">
-          <button
+          <TabButton
+            isActive={activeTab === "editor"}
             onClick={() => setActiveTab("editor")}
-            className={`flex-1 py-2 text-center ${
-              activeTab === "editor"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-600 dark:text-gray-400"
-            }`}
           >
             Code Editor
-          </button>
-          <button
+          </TabButton>
+          <TabButton
+            isActive={activeTab === "result"}
             onClick={() => setActiveTab("result")}
-            className={`flex-1 py-2 text-center ${
-              activeTab === "result"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-600 dark:text-gray-400"
-            }`}
           >
-            Analysis Result
-          </button>
+            Analysis
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+              />
+            </svg>
+          </TabButton>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Left Column: Code Editor */}
         <div
           className={`flex flex-col ${
             activeTab === "editor" || !activeTab ? "block" : "hidden"
           } md:block md:h-[calc(90vh-10%)]`}
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+          <div className="flex sm:flex-row items-start sm:items-center gap-4 mb-4">
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
@@ -147,11 +177,42 @@ const CodeAnalysis = () => {
               <option value="javascript">JavaScript</option>
               <option value="python">Python</option>
             </select>
+
+            <Button
+              onClick={handleAnalyze}
+              variant="secondary"
+              className="btn btn-primary"
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? "Analyzing code..." : "Analyze"}
+
+              <span className="ml-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+              </span>
+            </Button>
           </div>
 
           <CodeMirror
             value={code}
-            height="100%"
+            height="65vh"
             extensions={[language === "javascript" ? javascript() : python()]}
             theme={oneDark}
             onChange={(value) => setCode(value)}
@@ -169,21 +230,12 @@ const CodeAnalysis = () => {
             activeTab === "result" || !activeTab ? "block" : "hidden"
           } md:block md:h-[calc(90vh-10%)]`}
         >
-          <Button
-            onClick={handleAnalyze}
-            variant="secondary"
-            disabled={isAnalyzing}
-            className="mb-4"
-          >
-            Analyze
-          </Button>
+          <div className="flex sm:flex-row items-start sm:items-center gap-4 mb-4">
+            <br></br>
+          </div>
 
           <div className="dark-container flex-grow overflow-auto p-4">
-            {isAnalyzing && (
-              <div className="flex justify-center items-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-              </div>
-            )}
+            {isAnalyzing && <Loader size={6} color="blue-500" />}
 
             {!isAnalyzing && renderAnalysisResult()}
           </div>

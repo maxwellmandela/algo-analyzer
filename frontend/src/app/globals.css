@@ -39,3 +39,7 @@ body {
 .text-info {
   @apply text-blue-600 dark:text-blue-400;
 }
+
+li, ul {
+  @apply list-disc pl-5;
+}

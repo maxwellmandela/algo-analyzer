@@ -33,7 +33,7 @@ export default function RootLayout({
           content="AlgOracle - The ultimate algorithm insights platform, code analyzer"
         />
         <meta name="theme-color" content="#000000" />
-        <link rel="apple-touch-icon" href="/logo192.png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="manifest" href="/site.webmanifest" />
 
         <title>AlgOracle</title>

@@ -12,7 +12,7 @@ type ButtonVariant =
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
-  size?: "default" | "sm" | "lg" | "icon";
+  size?: "default" | "sm" | "lg" | "xl" | "2xl" | "icon";
   className?: string;
   children?: ReactNode;
 }
@@ -27,6 +27,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size === "default" && "px-4 py-2",
       size === "sm" && "px-3 py-1.5",
       size === "lg" && "px-6 py-3",
+      size === "xl" && "px-6 py-6 text-xl",
+      size === "2xl" && "px-6 py-8 text-2xl",
       size === "icon" && "p-2",
       variant === "default" &&
         "bg-primary text-primary-foreground hover:bg-primary/90",
