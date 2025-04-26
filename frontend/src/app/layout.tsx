@@ -42,7 +42,28 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Nav />
+
         {children}
+
+        {/* Footer */}
+        <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+          <a
+            className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+            href="https://github.com/maxwellmandela"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Github
+          </a>
+          <a
+            className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+            href="https://www.linkedin.com/in/maxwellmandela/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            By Maxwell Mandela
+          </a>
+        </footer>
       </body>
     </html>
   );

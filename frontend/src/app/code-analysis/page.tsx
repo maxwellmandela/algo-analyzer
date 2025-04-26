@@ -6,11 +6,13 @@ import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { oneDark } from "@codemirror/theme-one-dark";
 import Markdown from "react-markdown";
+import Button from "../components/ui/Button";
 
 const CodeAnalysis = () => {
   const [language, setLanguage] = useState("python");
   const [result, setResult] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [activeTab, setActiveTab] = useState("editor"); // Track active tab for small devices
 
   // sample code snippet
   const [code, setCode] = useState(`def fibonacci(n):
@@ -70,40 +72,24 @@ const CodeAnalysis = () => {
 
       return (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-            Summary
-          </h3>
+          <h3 className="heading-lg">Summary</h3>
           <Markdown>{markdownSummary}</Markdown>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Time Complexity
-              </h3>
-              <p className="text-green-600 dark:text-green-400">
-                {analysis.time_complexity}
-              </p>
+              <h3 className="heading-lg">Time Complexity</h3>
+              <p className="text-success">{analysis.time_complexity}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Space Complexity
-              </h3>
-              <p className="text-green-600 dark:text-green-400">
-                {analysis.space_complexity}
-              </p>
+              <h3 className="heading-lg">Space Complexity</h3>
+              <p className="text-success">{analysis.space_complexity}</p>
             </div>
           </div>
 
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-            Optimizations
-          </h3>
+          <h3 className="heading-lg">Optimizations</h3>
           <Markdown>{markdownOptimizations}</Markdown>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-            Language
-          </h3>
-          <p className="text-blue-600 dark:text-blue-400">
-            {analysis.language}
-          </p>
+          <h3 className="heading-lg">Language</h3>
+          <p className="text-info">{analysis.language}</p>
         </div>
       );
     } catch (error) {
@@ -119,9 +105,39 @@ const CodeAnalysis = () => {
 
   return (
     <div className="p-4 md:p-8">
+      {/* Tabs for small devices */}
+      <div className="block md:hidden mb-4">
+        <div className="flex border-b">
+          <button
+            onClick={() => setActiveTab("editor")}
+            className={`flex-1 py-2 text-center ${
+              activeTab === "editor"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            Code Editor
+          </button>
+          <button
+            onClick={() => setActiveTab("result")}
+            className={`flex-1 py-2 text-center ${
+              activeTab === "result"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            Analysis Result
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Left Column: Code Editor */}
-        <div className="flex flex-col">
+        <div
+          className={`flex flex-col ${
+            activeTab === "editor" || !activeTab ? "block" : "hidden"
+          } md:block md:h-[calc(90vh-10%)]`}
+        >
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
             <select
               value={language}
@@ -131,38 +147,38 @@ const CodeAnalysis = () => {
               <option value="javascript">JavaScript</option>
               <option value="python">Python</option>
             </select>
-
-            <button
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
-              className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              {isAnalyzing ? "Analyzing..." : "Analyze"}
-            </button>
           </div>
 
           <CodeMirror
             value={code}
-            height="400px"
+            height="100%"
             extensions={[language === "javascript" ? javascript() : python()]}
             theme={oneDark}
             onChange={(value) => setCode(value)}
-            className="rounded-md shadow-lg border border-gray-200 dark:border-gray-700"
+            className="rounded-md shadow-lg border border-gray-200 dark:border-gray-700 flex-grow"
           />
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-primary mb-6">
             Type your code above in Python or JavaScript and click {"Analyze"}{" "}
             to get insights.
           </p>
         </div>
 
         {/* Right Column: Result */}
+        <div
+          className={`flex flex-col ${
+            activeTab === "result" || !activeTab ? "block" : "hidden"
+          } md:block md:h-[calc(90vh-10%)]`}
+        >
+          <Button
+            onClick={handleAnalyze}
+            variant="secondary"
+            disabled={isAnalyzing}
+            className="mb-4"
+          >
+            Analyze
+          </Button>
 
-        <div className="flex flex-col">
-          <div className="p-4 rounded-md bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-md min-h-[200px]">
-            <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">
-              Analysis Result:
-            </h2>
-
+          <div className="dark-container flex-grow overflow-auto p-4">
             {isAnalyzing && (
               <div className="flex justify-center items-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>

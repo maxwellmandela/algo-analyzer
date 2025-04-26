@@ -1,11 +1,41 @@
 @import "tailwindcss";
 
+/* Set @custom-variant */
 @custom-variant dark (&:where(.dark, .dark *));
 
+
 body {
-  @apply bg-gray-50 text-black;
+  @apply bg-gray-50 text-black; /* Default light mode */
 }
 
 .dark body {
-  @apply bg-gray-900 text-white;
+  @apply bg-gray-900 text-white; /* Dark mode, applied when .dark class is present */
+}
+
+/* Reusable styles for dark mode containers */
+.dark-container {
+  @apply bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md shadow-md;
+}
+
+/* Reusable styles for buttons */
+.btn-primary {
+  @apply bg-blue-500 text-white rounded-md px-4 py-2 hover:bg-blue-600 transition dark:bg-blue-700 dark:hover:bg-blue-600;
+}
+
+/* Reusable heading styles */
+.heading-lg {
+  @apply text-lg font-semibold text-gray-800 dark:text-gray-200;
+}
+
+/* Reusable text styles */
+.text-primary {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+.text-success {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.text-info {
+  @apply text-blue-600 dark:text-blue-400;
 }
