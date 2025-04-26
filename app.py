@@ -5,12 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 load_dotenv()
 
-from backend.src.schemas import AnalyzeRequest
-from backend.src.llm import generate_algo_analysis
 import logging
 from fastapi.logger import logger as fastapi_logger
-
-
+from backend.src.routes import router
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -18,7 +15,6 @@ app = FastAPI()
 from fastapi.openapi.utils import get_openapi
 
 # add logging
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -50,26 +46,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def index():
-    return {"message": "Welcome to the analysis API!"}
-
-@app.post("/analyze")
-async def analyze(request: AnalyzeRequest):
-    try:
-        res = generate_algo_analysis(request.code)
-        return res
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-# add rate limiting
-@app.middleware("http")
-async def rate_limit(request: Request, call_next):
-    # Implement rate limiting logic here
-    # For example, you can use a simple in-memory counter or a more sophisticated solution
-    # like Redis or a database to track request counts.
-    response = await call_next(request)
-    return response
+# Include routes
+app.include_router(router)
